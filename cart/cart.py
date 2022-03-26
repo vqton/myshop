@@ -13,7 +13,9 @@ class Cart(object):
     def add(self, product, quantity=1, override_quantity=False):
         product_id = str(product.id)
         if product_id not in self.cart:
-            self.cart[product_id] = {'quantity': 0, 'price': str(product.price)}
+            self.cart[product_id] = {'quantity': 0, 
+            'price': str(product.price)}
+        
         if override_quantity:
             self.cart[product_id]['quantity'] = quantity
         else:
@@ -29,8 +31,15 @@ class Cart(object):
     def __iter__(self):
         product_ids = self.cart.keys()
         products = Product.objects.filter(id__in=product_ids)
+        
+        
+        cart = self.cart.copy()
+
         for product in products:
-            self.cart[str(product.id)]['product'] = product
+            cart[str(product.id)]['product'] = product
+            # self.cart[str(product.id)]['product_name'] = product.name
+            # self.cart[str(product.id)]['product_price'] = float(product.price) 
+
         for item in self.cart.values():
             item['price'] = Decimal(item['price'])
             item['total_price'] = item['price'] * item['quantity']
@@ -40,7 +49,7 @@ class Cart(object):
         return sum(item['quantity'] for item in self.cart.values())
 
     def save(self):
-        self.session[settings.CART_SESSION_ID] = self.cart
+        # self.session[settings.CART_SESSION_ID] = self.cart
         self.session.modified = True
     
     def clear(self):
